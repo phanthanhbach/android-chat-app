@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.androidchatapp.utils.MySharedPreference
 import java.util.Timer
 import kotlin.concurrent.schedule
 
@@ -30,7 +31,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         Timer().schedule(3000) {
-            startActivity(Intent(applicationContext, RegisterActivity::class.java))
+            val accessToken: String = MySharedPreference().getAccessToken(applicationContext)
+            if (accessToken.isEmpty()) {
+                startActivity(Intent(applicationContext, LoginActivity::class.java))
+            } else {
+                startActivity(Intent(applicationContext, HomeActivity::class.java))
+            }
             finish()
         }
     }
