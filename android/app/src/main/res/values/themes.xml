@@ -6,4 +6,11 @@
     </style>
 
     <style name="Theme.AndroidChatApp" parent="Base.Theme.AndroidChatApp" />
+    <style name="Theme.AndroidChatApp.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <style name="Theme.AndroidChatApp.AppBarOverlay"
+        parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.AndroidChatApp.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>
