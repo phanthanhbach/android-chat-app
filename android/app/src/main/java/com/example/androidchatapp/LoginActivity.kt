@@ -64,6 +64,9 @@ class LoginActivity : AppCompatActivity() {
                     if (loginModel.status == "success") {
                         val preference: MySharedPreference = MySharedPreference()
                         preference.setAccessToken(applicationContext, loginModel.accessToken)
+
+                        startActivity(Intent(this, HomeActivity::class.java))
+                        finish()
                     } else {
                         Utility.showAlert(this, "Error", loginModel.message)
                     }
