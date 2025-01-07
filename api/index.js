@@ -404,7 +404,7 @@ http.listen(port, async function () {
                 user: {
                     _id: user._id,
                     name: user.name,
-                    email: user.email,
+                    phone: user.phone,
                     profileImage: user.profileImage
                 }
             })
