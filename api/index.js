@@ -58,6 +58,7 @@ global.mainURL = "http://localhost:3000"
 global.connectionString = "mongodb://localhost:27017"
 
 const auth = require("./modules/auth")
+const contacts = require("./modules/contacts")
 
 const nodemailer = require("nodemailer")
 global.nodemailerFrom = "support@adnan-tech.com"
@@ -83,6 +84,9 @@ http.listen(port, async function () {
         // database name
         global.db = client.db("android_chat_app")
         console.log("Database connected")
+
+        // include contacts module
+        contacts.init(app)
 
         app.post("/change-password", auth, async function (request, result) {
             const user = request.user
