@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/chats"
+        android:title="Chats"
+        android:icon="@drawable/round_chat_24"/>
+    <item
+        android:id="@+id/contacts"
+        android:title="Contacts"
+        android:icon="@drawable/round_account_box_24"/>
+
+    <item
         android:id="@+id/logout"
-        android:title="Logout" />
+        android:title="Logout"
+        android:icon="@drawable/round_directions_run_24"/>
 </menu>
