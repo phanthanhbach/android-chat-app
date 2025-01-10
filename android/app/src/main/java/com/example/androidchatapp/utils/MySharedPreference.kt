@@ -23,4 +23,16 @@ class MySharedPreference {
             context.getSharedPreferences(fileName, Context.MODE_PRIVATE)
         preferences.edit().remove("accessToken").apply()
     }
+
+    fun setContactsSave(context: Context) {
+        val preferences: SharedPreferences =
+            context.getSharedPreferences(fileName, Context.MODE_PRIVATE)
+        preferences.edit().putBoolean("contactsSave", true).apply()
+    }
+
+    fun hasSaveContacts(context: Context): Boolean {
+        val preferences: SharedPreferences =
+            context.getSharedPreferences(fileName, Context.MODE_PRIVATE)
+        return preferences.getBoolean("contactsSave", false)
+    }
 }
