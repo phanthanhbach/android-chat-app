@@ -1,7 +1,7 @@
 package com.example.androidchatapp.fragments
 
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,15 +11,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.example.androidchatapp.ChatActivity
 import com.example.androidchatapp.R
 import com.example.androidchatapp.adapters.ContactsAdapter
+import com.example.androidchatapp.interfaces.RVInterface
 import com.example.androidchatapp.models.FetchContactsModel
 import com.example.androidchatapp.models.User
 import com.example.androidchatapp.utils.MySharedPreference
 import com.example.androidchatapp.utils.Utility
 import com.google.gson.Gson
 
-class ChatsFragment : Fragment() {
+class ChatsFragment : Fragment(), RVInterface {
 
     lateinit var sharedPreference: MySharedPreference
     lateinit var contacts: ArrayList<User>
@@ -40,7 +42,7 @@ class ChatsFragment : Fragment() {
         rv = view.findViewById(R.id.rv)
         rv.layoutManager = LinearLayoutManager(context)
 
-        adapter = ContactsAdapter(ArrayList())
+        adapter = ContactsAdapter(ArrayList(), this)
         rv.adapter = adapter
     }
 
@@ -83,5 +85,16 @@ class ChatsFragment : Fragment() {
             }
         }
         queue.add(stringRequest)
+    }
+
+    override fun onClick(view: View) {
+        val position: Int = rv.getChildAdapterPosition(view)
+        if (contacts.size > position) {
+            val user: User = contacts[position]
+            val intent: Intent = Intent(context, ChatActivity::class.java)
+            intent.putExtra("name", user.name)
+            intent.putExtra("phone", user.phone)
+            startActivity(intent)
+        }
     }
 }
