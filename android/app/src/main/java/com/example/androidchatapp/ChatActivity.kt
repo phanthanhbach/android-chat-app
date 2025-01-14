@@ -8,9 +8,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.example.androidchatapp.models.FetchMessagesModel
+import com.example.androidchatapp.models.Message
 import com.example.androidchatapp.models.SendMessageModel
 import com.example.androidchatapp.utils.MySharedPreference
 import com.example.androidchatapp.utils.Utility
@@ -25,6 +29,9 @@ class ChatActivity : AppCompatActivity() {
     var phone: String = ""
     lateinit var toolbar: Toolbar
     lateinit var sharedPreference: MySharedPreference
+    lateinit var messages: ArrayList<Message>
+
+    lateinit var rv: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,9 +52,13 @@ class ChatActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
+        messages = ArrayList()
         sharedPreference = MySharedPreference()
         message = findViewById(R.id.message)
         btnSend = findViewById(R.id.btnSend)
+
+        rv = findViewById(R.id.rv)
+        rv.layoutManager = LinearLayoutManager(this)
 
         if (intent.hasExtra("phone") && intent.hasExtra("name")) {
             phone = intent.getStringExtra("phone").toString()
@@ -106,6 +117,13 @@ class ChatActivity : AppCompatActivity() {
             Method.POST,
             url,
             Response.Listener { response ->
+                val fetchMessagesModel: FetchMessagesModel =
+                    Gson().fromJson(response, FetchMessagesModel::class.java)
+                if(fetchMessagesModel.status == "success") {
+                    messages = fetchMessagesModel.data
+                } else {
+                    Utility.showAlert(this, "Error", fetchMessagesModel.message)
+                }
             }, Response.ErrorListener { error ->
 
             }) {
