@@ -54,7 +54,7 @@ const bcryptjs = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 // secret JWT key
 global.jwtSecret = "jwtSecret1234567890"
-global.mainURL = "http://localhost:3000"
+global.mainURL = "http://172.16.0.2:3000"
 global.connectionString = "mongodb://localhost:27017"
 
 const auth = require("./modules/auth")

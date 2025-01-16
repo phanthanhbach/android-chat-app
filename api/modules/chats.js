@@ -1,6 +1,7 @@
 const express = require("express");
 const auth = require("./auth");
 const ObjectID = require("mongodb").ObjectID;
+const fileSystem = require("fs");
 
 const crypto = require("crypto-js");
 const algorithm = "aes-256-cbc";
@@ -14,6 +15,9 @@ module.exports = {
             const user = req.user;
             const phone = req.fields.phone;
             const message = req.fields.message;
+            const base64 = req.fields.base64 || "";
+            const originalAttachmentName = req.fields.attachmentName || "";
+            const extension = req.fields.extension || "";
 
             const currentDate = new Date();
             const createdAt = currentDate.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh", hour12: false });
@@ -39,6 +43,21 @@ module.exports = {
                 return;
             }
 
+            let attachment = "";
+            let attachmentName = "";
+
+            if (base64 != "") {
+                attachmentName = new Date().getTime() + "." + extension;
+                attachment = "uploads/" + attachmentName;
+
+                fileSystem.writeFile(attachment, base64, "base64", function (error) {
+                    if (error) {
+                        console.log(error);
+                        return;
+                    }
+                });
+            }
+
             const messageData = {
                 _id: ObjectID(),
                 sender: {
@@ -52,10 +71,18 @@ module.exports = {
                     phone: receiver.phone
                 },
                 message: encryptedText,
+                attachmentName: attachmentName,
+                originalAttachmentName: originalAttachmentName,
+                attachment: attachment,
+                extension: extension,
                 createdAt: createdAt
             }
             await db.collection("messages").insertOne(messageData);
             messageData.message = message;
+
+            if (attachmentName != "") {
+                messageData.attachment = mainURL + "/" + attachment;
+            }
 
             res.json({
                 status: "success",
@@ -115,7 +142,15 @@ module.exports = {
                     sender: messages[i].sender,
                     receiver: messages[i].receiver,
                     createdAt: messages[i].createdAt,
-                    message: decryptedText
+                    message: decryptedText,
+                    attachmentName: messages[i].attachmentName || "",
+                    originalAttachmentName: messages[i].originalAttachmentName || "",
+                    attachment: messages[i].attachment || "",
+                    extension: messages[i].extension || ""
+                }
+
+                if (messageData.attachment != "") {
+                    messageData.attachment = mainURL + "/" + messageData.attachment;
                 }
                 data.push(messageData);
             }
