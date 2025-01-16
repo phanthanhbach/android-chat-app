@@ -1,9 +1,14 @@
 package com.example.androidchatapp
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
@@ -13,12 +18,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.example.androidchatapp.adapters.ChatsAdapter
 import com.example.androidchatapp.models.FetchMessagesModel
 import com.example.androidchatapp.models.Message
 import com.example.androidchatapp.models.SendMessageModel
 import com.example.androidchatapp.utils.MySharedPreference
 import com.example.androidchatapp.utils.Utility
 import com.google.gson.Gson
+import java.io.IOException
 import java.net.URLEncoder
 import java.nio.charset.Charset
 
@@ -30,8 +37,13 @@ class ChatActivity : AppCompatActivity() {
     lateinit var toolbar: Toolbar
     lateinit var sharedPreference: MySharedPreference
     lateinit var messages: ArrayList<Message>
+    lateinit var imgAttachment: ImageView
+    var base64: String = ""
+    var attachmentName: String = ""
+    var fileExtension: String = ""
 
     lateinit var rv: RecyclerView
+    lateinit var adapter: ChatsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,8 +69,18 @@ class ChatActivity : AppCompatActivity() {
         message = findViewById(R.id.message)
         btnSend = findViewById(R.id.btnSend)
 
+        imgAttachment = findViewById(R.id.imgAttachment)
+        imgAttachment.setOnClickListener {
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.type = "*/*"
+            startActivityForResult(intent, 565)
+        }
+
         rv = findViewById(R.id.rv)
         rv.layoutManager = LinearLayoutManager(this)
+
+        adapter = ChatsAdapter(ArrayList(), sharedPreference.getMyPhone(applicationContext))
+        rv.adapter = adapter
 
         if (intent.hasExtra("phone") && intent.hasExtra("name")) {
             phone = intent.getStringExtra("phone").toString()
@@ -73,7 +95,8 @@ class ChatActivity : AppCompatActivity() {
                 val queue = Volley.newRequestQueue(this)
                 val url = Utility.apiUrl + "/chats/send"
 
-                val requestBody = "phone=" + phone + "&message=" + message.text
+                val requestBody =
+                    "phone=" + phone + "&message=" + message.text + "&base64=" + base64 + "&attachmentName=" + attachmentName + "&extension=" + fileExtension
                 val stringRequest = object : StringRequest(
                     Method.POST,
                     url,
@@ -81,11 +104,17 @@ class ChatActivity : AppCompatActivity() {
                         Log.i("Encrypted", response)
 
                         btnSend.isEnabled = true
+
+                        message.setText("")
+                        base64 = ""
+                        attachmentName = ""
+                        fileExtension = ""
+
                         val sendMessageModel: SendMessageModel =
                             Gson().fromJson(response, SendMessageModel::class.java)
 
                         if (sendMessageModel.status == "success") {
-                            //
+                            adapter.appendData(sendMessageModel.messageData)
                         } else {
                             Utility.showAlert(this, "Error", sendMessageModel.message)
                         }
@@ -121,6 +150,7 @@ class ChatActivity : AppCompatActivity() {
                     Gson().fromJson(response, FetchMessagesModel::class.java)
                 if(fetchMessagesModel.status == "success") {
                     messages = fetchMessagesModel.data
+                    adapter.setData(messages)
                 } else {
                     Utility.showAlert(this, "Error", fetchMessagesModel.message)
                 }
@@ -137,6 +167,30 @@ class ChatActivity : AppCompatActivity() {
             }
         }
         queue.add(stringRequest)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == Activity.RESULT_OK && requestCode == 565) {
+            val data: Uri? = data?.data
+
+            base64 = ""
+            try {
+                val bytes: ByteArray? = data?.let {
+                    contentResolver.openInputStream(it)?.readBytes()
+                }
+                base64 = Base64.encodeToString(bytes, Base64.URL_SAFE)
+            } catch (exp: IOException) {
+                exp.printStackTrace()
+            }
+            data?.let {
+                attachmentName = Utility.getFileName(contentResolver, it)
+            }
+            data?.let {
+                fileExtension = Utility.getExtension(contentResolver, it)
+            }
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
