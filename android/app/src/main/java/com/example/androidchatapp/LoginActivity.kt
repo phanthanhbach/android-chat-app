@@ -64,6 +64,7 @@ class LoginActivity : AppCompatActivity() {
                     if (loginModel.status == "success") {
                         val preference: MySharedPreference = MySharedPreference()
                         preference.setAccessToken(applicationContext, loginModel.accessToken)
+                        preference.setMyPhone(applicationContext, loginModel.user.phone)
 
                         startActivity(Intent(this, HomeActivity::class.java))
                         finish()
