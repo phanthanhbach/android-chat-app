@@ -1,6 +1,8 @@
 package com.example.androidchatapp.adapters
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.androidchatapp.FullScreenImageActivity
 import com.example.androidchatapp.R
 import com.example.androidchatapp.models.Message
 import com.example.androidchatapp.utils.FetchImageFromInternet
@@ -63,6 +66,10 @@ class ChatsAdapter(
         return messages.size
     }
 
+    fun getData(): ArrayList<Message> {
+        return this.messages
+    }
+
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message: Message = messages[position]
 
@@ -73,6 +80,13 @@ class ChatsAdapter(
                 holder.attachmentImageView.visibility = View.VISIBLE
 
                 FetchImageFromInternet(holder.attachmentImageView).execute(message.attachment)
+
+                holder.attachmentImageView.setOnClickListener {
+                    val context: Context = holder.itemView.context
+                    val intent = Intent(context, FullScreenImageActivity::class.java)
+                    intent.putExtra("image_url", message.attachment)
+                    context.startActivity(intent)
+                }
             } else {
                 holder.attachmentImageView.visibility = View.GONE
             }
