@@ -84,6 +84,31 @@ module.exports = {
                 messageData.attachment = mainURL + "/" + attachment;
             }
 
+            await db.collection("users").findOneAndUpdate({
+                $and: [{
+                    _id: user._id
+                }, {
+                    "contacts.phone": receiver.phone
+                }]
+            }, {
+                $set: {
+                    "contacts.$.updateAt": new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh", hour12: false }),
+                }
+            })
+
+            await db.collection("users").findOneAndUpdate({
+                $and: [{
+                    _id: receiver._id
+                }, {
+                    "contacts.phone": user.phone
+                }]
+            }, {
+                $set: {
+                    "contacts.$.hasUnreadMessage": 1,
+                    "contacts.$.updateAt": new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh", hour12: false }),
+                }
+            })
+
             res.json({
                 status: "success",
                 message: "Message has been sent",
@@ -143,7 +168,7 @@ module.exports = {
                     receiver: messages[i].receiver,
                     createdAt: messages[i].createdAt,
                     message: decryptedText,
-                    attachmentName: messages[i].attachmentName || "",
+                    attachmentName: (new Date().getTime()) + "." + messages[i].extension || "",
                     originalAttachmentName: messages[i].originalAttachmentName || "",
                     attachment: messages[i].attachment || "",
                     extension: messages[i].extension || ""
@@ -154,6 +179,20 @@ module.exports = {
                 }
                 data.push(messageData);
             }
+            data.reverse();
+
+            await db.collection("users").findOneAndUpdate({
+                $and: [{
+                    _id: user._id
+                }, {
+                    "contacts.phone": phone
+                }]
+            }, {
+                $set: {
+                    "contacts.$.hasUnreadMessage": 0
+                }
+            })
+
             res.json({
                 status: "success",
                 message: "Data fetched successfully",
