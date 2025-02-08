@@ -56,4 +56,5 @@ dependencies {
     implementation("com.android.volley:volley:1.2.1")
     implementation("com.google.code.gson:gson:2.11.0")
     implementation ("com.github.chrisbanes:PhotoView:2.3.0")
+    implementation ("com.karumi:dexter:6.2.3")
 }
