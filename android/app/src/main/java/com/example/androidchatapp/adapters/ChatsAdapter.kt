@@ -85,6 +85,7 @@ class ChatsAdapter(
                     val context: Context = holder.itemView.context
                     val intent = Intent(context, FullScreenImageActivity::class.java)
                     intent.putExtra("image_url", message.attachment)
+                    intent.putExtra("image_name", message.attachmentName)
                     context.startActivity(intent)
                 }
             } else {
