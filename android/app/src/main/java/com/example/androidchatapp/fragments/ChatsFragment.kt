@@ -2,9 +2,12 @@ package com.example.androidchatapp.fragments
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -27,6 +30,7 @@ class ChatsFragment : Fragment(), RVInterface {
     lateinit var contacts: ArrayList<User>
     lateinit var rv: RecyclerView
     lateinit var adapter: ContactsAdapter
+    lateinit var search_text: EditText
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,6 +48,27 @@ class ChatsFragment : Fragment(), RVInterface {
 
         adapter = ContactsAdapter(ArrayList(), this)
         rv.adapter = adapter
+
+        search_text = view.findViewById(R.id.search_text)
+        search_text.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val tempChats: ArrayList<User> = ArrayList()
+
+                for (chat in contacts) {
+                    if (chat.name.lowercase().contains(search_text.text, true)) {
+                        tempChats.add(chat)
+                    }
+                }
+                adapter.setData(tempChats)
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+            }
+
+        })
     }
 
     override fun onResume() {
@@ -89,6 +114,7 @@ class ChatsFragment : Fragment(), RVInterface {
 
     override fun onClick(view: View) {
         val position: Int = rv.getChildAdapterPosition(view)
+        val contacts: ArrayList<User> = adapter.getData()
         if (contacts.size > position) {
             val user: User = contacts[position]
             val intent: Intent = Intent(context, ChatActivity::class.java)

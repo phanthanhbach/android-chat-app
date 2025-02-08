@@ -29,15 +29,24 @@ class ContactsAdapter(
         return contacts.size
     }
 
+    @SuppressLint("ResourceAsColor")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val contact: User = contacts[position]
 
         holder.name.text = contact.name
         holder.phone.text = contact.phone
 
+        if (contact.hasUnreadMessage == 1) {
+            holder.itemView.setBackgroundColor(R.color.mint_green)
+        }
+
         holder.itemView.setOnClickListener {
             rvInterface.onClick(holder.itemView)
         }
+    }
+
+    fun getData(): ArrayList<User> {
+        return this.contacts
     }
 
     @SuppressLint("NotifyDataSetChanged")
